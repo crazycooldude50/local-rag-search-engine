@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  backend:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      # Map the local chroma_db folder to the container
+      # This ensures your ingested PDF data persists!
+      - ./chroma_db:/app/chroma_db
+    environment:
+      # SPECIAL VALUE: host.docker.internal points to your Windows machine
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+    extra_hosts:
+      - "host.docker.internal:host-gateway"

@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+langchain
+langchain-community
+langchain-ollama
+langchain-chroma
+chromadb
+pydantic
+requests

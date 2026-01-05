@@ -4,21 +4,40 @@ from langchain_chroma import Chroma
 from langchain_ollama import OllamaEmbeddings
 from langchain_ollama import ChatOllama
 from langchain_core.prompts import ChatPromptTemplate
+from fastapi.middleware.cors import CORSMiddleware
+import os
 
 # 1. Configuration
+# We use an environment variable for the base URL. 
+# If running locally, it defaults to localhost. If in Docker, we will change it.
+OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+
 DB_PATH = "./chroma_db"
 EMBEDDING_MODEL = "nomic-embed-text"
 LLM_MODEL = "llama3"
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allows all origins
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # 2. Load Resources (Done once when server starts)
 print("Initializing Vector DB...")
-embedding_function = OllamaEmbeddings(model=EMBEDDING_MODEL)
+embedding_function = OllamaEmbeddings(
+    model=EMBEDDING_MODEL, 
+    base_url=OLLAMA_BASE_URL
+)
 db = Chroma(persist_directory=DB_PATH, embedding_function=embedding_function)
 
 print("Initializing LLM...")
-llm = ChatOllama(model=LLM_MODEL)
+llm = ChatOllama(
+    model=LLM_MODEL, 
+    base_url=OLLAMA_BASE_URL 
+)
 
 # 3. Define the Prompt Template
 prompt_template = ChatPromptTemplate.from_template("""
