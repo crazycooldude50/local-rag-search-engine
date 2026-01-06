@@ -19,7 +19,7 @@ LLM_MODEL = "llama3"
 app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allows all origins
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -40,8 +40,17 @@ llm = ChatOllama(
 )
 
 # 3. Define the Prompt Template
+# 3. Define the Prompt Template
 prompt_template = ChatPromptTemplate.from_template("""
-Answer the question based ONLY on the following context:
+You are a helpful AI assistant. You are given a context that may contain information from multiple different documents.
+Your goal is to answer the user's question accurately.
+
+Instructions:
+1. Look for the specific answer in the context below.
+2. If the context contains information about different topics (e.g., different games or subjects), ONLY use the part that is relevant to the user's question.
+3. Do not mention "the provided context" or "documents" in your answer. Just answer the question directly.
+
+Context:
 {context}
 
 Question: {question}
@@ -53,7 +62,7 @@ class QueryRequest(BaseModel):
 @app.post("/chat")
 async def chat(request: QueryRequest):
     # Step A: Retrieve Context
-    results = db.similarity_search(request.query, k=3)
+    results = db.similarity_search(request.query, k=5)
     if not results:
         return {"answer": "I couldn't find any relevant information."}
     
